@@ -1,2 +1,7 @@
-# opengl-round2
-Summer 2024 computer graphics investigation. Re-learning OpenGL + going through "Real-Time Rendering, Fourth Edition". Stretch Goal: "Ray-tracing in one weekend""
+## opengl-round2: Summer 2024 Computer Graphics Investigation
+### Main Goals
+- Re-learn OpenGL using [learnopengl](https://learnopengl.com/Getting-started/Creating-a-window)
+- Read through "Real-Time Rendering, Fourth Edition"
+### Stretch Goals:
+- Complete [Ray-Tracing in One Weekend](https://raytracing.github.io/)
+- Complete [The Book of Shaders](https://thebookofshaders.com/)
