@@ -9,8 +9,6 @@
 
 # Running the Code
 ```bash
-mkdir build # Create build directory
-cd build 
-cmake .. # Reference CMakeLists in root directory
-cmake --build . # Build the executable
+cmake -B build 
+cmake --build build
 ```
