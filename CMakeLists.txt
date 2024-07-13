@@ -24,7 +24,7 @@ add_library(glad external/glad/src/glad.c)
 # Specify where to find the glad.h header
 target_include_directories(glad PUBLIC external/glad/include)
 
-# Add the executable - main.cpp contains our application's entry point
+# Add the executable 
 add_executable(opengl_round2 src/main.cpp)
 
 # Link the executable with the glfw and glad libraries
