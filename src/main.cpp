@@ -16,7 +16,7 @@ int main()
     unsigned int width = 800;
     unsigned int height = 600;
 
-    GLFWwindow * window = glfwCreateWindow(width, height, "OpenGL-Round2", NULL, NULL);
+    GLFWwindow * window = glfwCreateWindow(width, height, "opengl-round2", NULL, NULL);
     if (window == NULL) 
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -45,6 +45,7 @@ int main()
         // Rendering Commands
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        std::cout << "Rendering" << std::endl;
 
         // Swap Buffers
         glfwSwapBuffers(window);
