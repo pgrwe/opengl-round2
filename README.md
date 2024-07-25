@@ -13,4 +13,8 @@ cmake -B build
 cmake --build build
 ./build/bin/opengl_round2
 ```
+You can also use the provided makefile
+```bash
+make
+```
 Tested on Windows 11 and Arch Linux

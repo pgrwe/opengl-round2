@@ -24,9 +24,9 @@ add_library(glad external/glad/src/glad.c)
 # Specify where to find the glad.h header
 target_include_directories(glad PUBLIC external/glad/include)
 
-# Add the executable - main.cpp contains our application's entry point
-# add_executable(opengl_round2 src/main.cpp)
-add_executable(opengl_round2 src/offscreen_render.cpp)
+add_executable(opengl_round2 src/main.cpp)
+# Testing offscreen rendering for a flutter project
+# add_executable(offscreen_render src/offscreen_render.cpp) 
 
 # Link the executable with the glfw and glad libraries
 target_link_libraries(opengl_round2 glfw glad)
