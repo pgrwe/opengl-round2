@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <numeric>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);  
 void processInput(GLFWwindow *window);
@@ -24,10 +25,16 @@ const char *fragmentShaderSource = "#version 330 core\n"
 int main() 
 {
     float triangleVertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
+    0.5f,  0.5f, 0.0f,  // top right
+    0.5f, -0.5f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f,  // bottom left
+    -0.5f,  0.5f, 0.0f   // top left 
     };  
+
+    unsigned int indices[] = {
+        0, 1, 3, // first tri
+        1, 2, 3 // second tri
+    };
 
     /* Buffers:
     A buffer in OpenGL is, at its core, an object that manages a certain piece of GPU memory and nothing more. 
@@ -63,10 +70,6 @@ int main()
 
     glViewport(0, 0, width, height);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);  
-
-    // Vertex Objects
-    GLuint VBO; // Stores a large number of vertices in GPU's memory 
-    GLuint VAO; // Stores the state of vertex attribute configurations
 
     // Shaders
     GLuint vertexShader, fragmentShader;
@@ -119,19 +122,28 @@ int main()
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
     
+    // OpenGL Objects
+    GLuint VBO; // Vertex Buffer Object: Stores a large number of vertices in GPU's memory 
+    GLuint VAO; // Vertex Array Object: Stores the state of vertex attribute (normals, uv coords, color, etc) configurations
+    GLuint EBO; // Element Buffer Object: Stores indices of what vertices to draw
+
     // Binding: making an object the current target for subsequent operations
 
     // Create VAO
     glGenVertexArrays(1, &VAO);
-    // Bind the VAO 
     glBindVertexArray(VAO);
 
     // Create VBO
     glGenBuffers(1, &VBO); 
-    // Copy triangleVertices data into currently bound buffer (VBO)
     glBindBuffer(GL_ARRAY_BUFFER, VBO); 
+    // Copy triangleVertices data into currently bound buffer (VBO)
     // GL_STATIC_DRAW ensures the gpu will place the data from the bound buffer into memory that allows for faster reads (and no writes?)
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
+
+    // Create EBO
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     /* Parameter Breakdown
     1st: specifices vertex attribute to configure (currently only position)
@@ -160,7 +172,9 @@ int main()
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         // This needs to be after glClear for anything actually to be drawn
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
         // Swap Buffers
         glfwSwapBuffers(window);
@@ -180,4 +194,16 @@ void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if(glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        std::cout << "WIREFRAME MODE" << std::endl;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        std::cout  << "FILL MODE" << std::endl;
+    }    
 }
