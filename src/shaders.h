@@ -2,11 +2,8 @@
 #define SHADERS_H
 
 #include <glad/glad.h>
-#include <string.h>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <cerrno>
+#include <string>
 
 std::string get_file_contents(const char * filename);
 
