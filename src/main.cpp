@@ -1,35 +1,27 @@
+#include "shaders.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <numeric>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);  
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow* window);
 
-// Move to .vert file
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.5f, 0.7f);\n"
-    "}\0";
 
 
 int main() 
 {
-    float triangleVertices[] = {
+    GLfloat rectVertices[] = {
     0.5f,  0.5f, 0.0f,  // top right
     0.5f, -0.5f, 0.0f,  // bottom right
     -0.5f, -0.5f, 0.0f,  // bottom left
     -0.5f,  0.5f, 0.0f   // top left 
     };  
+
+    GLfloat triforceVertices[] = {
+    -0.5f, -0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
+    0.0f,  0.5f, 0.0f  
+    };
 
     unsigned int indices[] = {
         0, 1, 3, // first tri
@@ -51,7 +43,7 @@ int main()
     unsigned int width = 800;
     unsigned int height = 600;
 
-    GLFWwindow * window = glfwCreateWindow(width, height, "opengl-round2", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "opengl-round2", NULL, NULL);
     if (window == NULL) 
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -71,57 +63,8 @@ int main()
     glViewport(0, 0, width, height);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);  
 
-    // Shaders
-    GLuint vertexShader, fragmentShader;
-    GLuint shaderProgram = glCreateProgram(); // links shaders to be used when issuing render calls
-
-    // Create the vertex shader    
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    // Reference to the source code for the shader
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    // Compile the shader
-    glCompileShader(vertexShader);
-
-    // Same idea applies to fragment shader    
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // Attach vertex and fragment shaders to the shader program
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    // Link the compiled shaders
-    glLinkProgram(shaderProgram);
-
-    // Since compilation and linking is complete, delete shaders
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    // Shader compilation debug stuff
-    int fragSuccess, vertSuccess, shdrpgrmSuccess;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertSuccess);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragSuccess);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &shdrpgrmSuccess);
-
-    if (!fragSuccess)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    if (!vertSuccess)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    if (!shdrpgrmSuccess)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-    
+    Shader shaderProgram("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
+ 
     // OpenGL Objects
     GLuint VBO; // Vertex Buffer Object: Stores a large number of vertices in GPU's memory 
     GLuint VAO; // Vertex Array Object: Stores the state of vertex attribute (normals, uv coords, color, etc) configurations
@@ -136,12 +79,13 @@ int main()
     // Create VBO
     glGenBuffers(1, &VBO); 
     glBindBuffer(GL_ARRAY_BUFFER, VBO); 
-    // Copy triangleVertices data into currently bound buffer (VBO)
+    // Copy rectVertices data into currently bound buffer (VBO)
     // GL_STATIC_DRAW ensures the gpu will place the data from the bound buffer into memory that allows for faster reads (and no writes?)
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rectVertices), rectVertices, GL_STATIC_DRAW);
 
     // Create EBO
     glGenBuffers(1, &EBO);
+    // EBO is stored in the VAO, so unbind it after
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
@@ -168,19 +112,21 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // State setting function 
         glClear(GL_COLOR_BUFFER_BIT); // State using function
 
+        shaderProgram.activate();
         // This can be before glClear (unsure if will cause undefined behavior)
-        glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         // This needs to be after glClear for anything actually to be drawn
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);  
 
         // Swap Buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    shaderProgram.dispose();
     glfwTerminate();
     return 0;
 }
@@ -190,7 +136,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }  
 
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow* window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -198,12 +144,12 @@ void processInput(GLFWwindow *window)
     if(glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        std::cout << "WIREFRAME MODE" << std::endl;
+        // std::cout  << "WIREFRAME MODE" << std::endl;
     }
 
     if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        std::cout  << "FILL MODE" << std::endl;
+        // std::cout  << "FILL MODE" << std::endl;
     }    
 }

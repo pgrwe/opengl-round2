@@ -1,7 +1,8 @@
 ## opengl-round2: Summer 2024 Computer Graphics Investigation
-### Main Goals
+### Main Goals + Resources Used
 - Re-learn OpenGL using [learnopengl](https://learnopengl.com/Getting-started/Creating-a-window)
 - Read through "Real-Time Rendering, Fourth Edition"
+- Victor Gordan's [OpenGL tutorials](https://www.youtube.com/watch?v=greXpRqCTKs&list=PLPaoO-vpZnumdcb4tZc4x5Q-v7CkrQ6M-&index=6)
 ### Stretch Goals:
 - Complete [Ray-Tracing in One Weekend](https://raytracing.github.io/)
 - Complete [The Book of Shaders](https://thebookofshaders.com/)
@@ -17,4 +18,4 @@ You can also use the provided makefile
 ```bash
 make
 ```
-Tested on Windows 11 and Arch Linux
+Tested on Arch Linux, Windows 11, and macOS
