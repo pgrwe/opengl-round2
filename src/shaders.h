@@ -10,16 +10,19 @@ std::string get_file_contents(const char * filename);
 class Shader
 {
     public:
-        GLuint shaderProgramID;
-        Shader(const char *vertexFile, const char *fragmentFile);
-
-        // void loadFragmentShader();
-        // void loadVertexShader();
+        GLuint ID;
+        Shader(const char* vFile, const char* fFile);
         void activate();
         void dispose();
 
     private:
-        int debug(GLuint& vertexShader, GLuint& fragmentShader);
+        int debugAllShaders(GLuint& vertexShader, GLuint& fragmentShader);
+        int debugFragmentShader(GLuint& fragmentShader);
+        int debugVertexShader(GLuint& vertexShader);
+        int debugShaderProgram(); // uses ID of current Shader object
+        // May be public later?
+        void loadFragmentShader(const char* fFile);
+        void loadVertexShader(const char* vFile);
 };
 
 #endif
