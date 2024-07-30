@@ -1,4 +1,5 @@
 #include "shaders.h"
+#include <MacTypes.h>
 #include <fstream>
 #include <ios>
 #include <iostream>
@@ -26,44 +27,47 @@ Shader::Shader(const char* vFile, const char* fFile)
     GLuint vertexShader, fragmentShader;
     ID = glCreateProgram(); // links shaders to be used when issuing render calls
 
-    loadFragmentShader(fFile);
-    loadVertexShader(vFile);
+    fragmentShader = loadFragmentShader(fFile);
+    vertexShader = loadVertexShader(vFile);
 
     // Link the compiled shaders
     glLinkProgram(ID);
-    debugAllShaders(vertexShader,fragmentShader);
+
+    debugAllShaders(vertexShader, fragmentShader);
 
     // Since compilation and linking is complete, delete shaders
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 }
 
-void Shader::loadFragmentShader(const char* fFile)
+GLuint Shader::loadFragmentShader(const char* fFile)
 {
     std::string fragmentShaderCode = get_file_contents(fFile);
     const char* fragmentSource = fragmentShaderCode.c_str();
 
-    // Create the fragment shader    
+    // Create the fragment shader
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     // Reference to the source code for the fragment shader
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
     // Compile the fragment shader
     glCompileShader(fragmentShader);
     glAttachShader(ID, fragmentShader);
+    return fragmentShader;
 }
 
-void Shader::loadVertexShader(const char* vFile)
+GLuint Shader::loadVertexShader(const char* vFile)
 {
     std::string vertexShaderCode = get_file_contents(vFile);
     const char* vertexSource = vertexShaderCode.c_str();
 
-    // Create the vertex shader    
+    // Create the vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     // Reference to the source code for the fragment shader
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     // Compile the fragment shader
     glCompileShader(vertexShader);
     glAttachShader(ID, vertexShader);
+    return vertexShader;
 }
 
 void Shader::activate()

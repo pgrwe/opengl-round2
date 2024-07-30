@@ -21,8 +21,8 @@ class Shader
         int debugVertexShader(GLuint& vertexShader);
         int debugShaderProgram(); // uses ID of current Shader object
         // May be public later?
-        void loadFragmentShader(const char* fFile);
-        void loadVertexShader(const char* vFile);
+        GLuint loadFragmentShader(const char* fFile);
+        GLuint loadVertexShader(const char* vFile);
 };
 
 #endif
