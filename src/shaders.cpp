@@ -1,5 +1,4 @@
 #include "shaders.h"
-#include <MacTypes.h>
 #include <fstream>
 #include <ios>
 #include <iostream>
