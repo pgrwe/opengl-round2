@@ -3,6 +3,10 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "vbo.h"
+#include "vao.h"
+#include "ebo.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);  
 void processInput(GLFWwindow* window);
 
@@ -28,12 +32,6 @@ int main()
         1, 2, 3 // second tri
     };
 
-    /* Buffers:
-    A buffer in OpenGL is, at its core, an object that manages a certain piece of GPU memory and nothing more. 
-    We give meaning to a buffer when binding it to a specific buffer target. 
-    A buffer is only a vertex array buffer when we bind it to GL_ARRAY_BUFFER, but we could just as easily bind it to GL_ELEMENT_ARRAY_BUFFER. 
-    OpenGL internally stores a reference to the buffer per target and, based on the target, processes the buffer differently. 
-    */ 
     // Initialize GLFW
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -64,43 +62,20 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);  
 
     Shader shaderProgram("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
+
+    /* Buffers:
+    A buffer in OpenGL is, at its core, an object that manages a certain piece of GPU memory and nothing more. 
+    We give meaning to a buffer when binding it to a specific buffer target. 
+    A buffer is only a vertex array buffer when we bind it to GL_ARRAY_BUFFER, but we could just as easily bind it to GL_ELEMENT_ARRAY_BUFFER. 
+    OpenGL internally stores a reference to the buffer per target and, based on the target, processes the buffer differently. 
+    */ 
  
     // OpenGL Objects
-    GLuint VBO; // Vertex Buffer Object: Stores a large number of vertices in GPU's memory 
-    GLuint VAO; // Vertex Array Object: Stores the state of vertex attribute (normals, uv coords, color, etc) configurations
-    GLuint EBO; // Element Buffer Object: Stores indices of what vertices to draw
-
-    // Binding: making an object the current target for subsequent operations
-
-    // Create VAO
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    // Create VBO
-    glGenBuffers(1, &VBO); 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); 
-    // Copy rectVertices data into currently bound buffer (VBO)
-    // GL_STATIC_DRAW ensures the gpu will place the data from the bound buffer into memory that allows for faster reads (and no writes?)
-    glBufferData(GL_ARRAY_BUFFER, sizeof(rectVertices), rectVertices, GL_STATIC_DRAW);
-
-    // Create EBO
-    glGenBuffers(1, &EBO);
-    // EBO is stored in the VAO, so unbind it after
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    /* Parameter Breakdown
-    1st: specifices vertex attribute to configure (currently only position)
-    2nd: size of vertex attribute, vec3 so 3 values
-    3rd: data type of the attribute
-    4th: decide to normalize based on data type
-    5th: stride - distance between contiguous vertex attributes
-    6th: offset - where the start of the attribute data is located in the buffer 
-    vertex attribute 0 is now associated with the vertex data from the currently bound VBO
-    */
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // Enable the vertex attribute 
-    glEnableVertexAttribArray(0);
+    VBO vbo1(sizeof(rectVertices), rectVertices); 
+    EBO ebo1(sizeof(indices), indices); 
+    VAO vao1; 
+    vao1.bind();
+    vao1.linkVBO(vbo1, 0);
 
     // Main Game Loop
     while (!glfwWindowShouldClose(window)) 
@@ -114,9 +89,9 @@ int main()
 
         shaderProgram.activate();
         // This can be before glClear (unsure if will cause undefined behavior)
-        glBindVertexArray(VAO);
+        vao1.bind();
         // This needs to be after glClear for anything actually to be drawn
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo1.ID);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
         glDrawArrays(GL_TRIANGLES, 0, 3);  
@@ -126,7 +101,11 @@ int main()
         glfwPollEvents();
     }
 
+    vao1.dispose();    
+    vbo1.dispose();    
+    ebo1.dispose();    
     shaderProgram.dispose();
+    glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 }
