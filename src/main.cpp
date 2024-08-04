@@ -1,4 +1,6 @@
 #include "shaders.h"
+#include <array>
+#include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -17,20 +19,31 @@ int main()
     GLfloat rectVertices[] = {
     0.5f,  0.5f, 0.0f,  // top right
     0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
+    -0.5f, -0.5f, 0.0f,     // bottom left
     -0.5f,  0.5f, 0.0f   // top left 
     };  
+    
 
     GLfloat triforceVertices[] = {
-    -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    0.0f,  0.5f, 0.0f  
+    -0.5f, -0.5f, 0.0f, // bottom left
+    0.0f, -0.5f, 0.0f, // bottom middle
+    0.5f,  -0.5f, 0.0f,  // bottom right
+    -0.25f,  0.0f, 0.0f,  // middle left
+    0.25f,  0.0f, 0.0f,  // middle right
+    0.0f, 0.5f, 0.0f, // top
     };
 
-    unsigned int indices[] = {
+    unsigned int rectIndices[] = {
         0, 1, 3, // first tri
         1, 2, 3 // second tri
     };
+
+    unsigned int triforceIndices[] = {
+        0, 3, 1,
+        1, 2, 4,
+        4, 5, 3,  
+    };
+
 
     // Initialize GLFW
     glfwInit();
@@ -48,7 +61,6 @@ int main()
         glfwTerminate();
         return -1;
     }
-
     glfwMakeContextCurrent(window);
 
     // Initialize GLAD to use OpenGL functions
@@ -61,7 +73,7 @@ int main()
     glViewport(0, 0, width, height);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);  
 
-    Shader shaderProgram("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
+    Shader shaderProgram("src/shaders/default.vert", "src/shaders/default.frag");
 
     /* Buffers:
     A buffer in OpenGL is, at its core, an object that manages a certain piece of GPU memory and nothing more. 
@@ -71,15 +83,25 @@ int main()
     */ 
  
     // OpenGL Objects
-    VBO vbo1(sizeof(rectVertices), rectVertices); 
-    EBO ebo1(sizeof(indices), indices); 
+
+    // VBO vbo1(sizeof(rectVertices), rectVertices); 
+    // EBO ebo1(sizeof(rectIndices), rectIndices); 
+    VBO vbo1(sizeof(triforceVertices), triforceVertices); 
+    EBO ebo1(sizeof(triforceIndices), triforceIndices); 
     VAO vao1; 
     vao1.bind();
-    vao1.linkVBO(vbo1, 0);
+    vao1.linkVBO(vbo1, 0);    
+
+    float timeValue;    
+    float value;    
+
+    // int elementCount = (sizeof(rectIndices)/sizeof(rectIndices[0]));
+    int elementCount = (sizeof(triforceIndices)/sizeof(triforceIndices[0]));
 
     // Main Game Loop
     while (!glfwWindowShouldClose(window)) 
     {
+
         // Handle Input
         processInput(window);
 
@@ -87,12 +109,21 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // State setting function 
         glClear(GL_COLOR_BUFFER_BIT); // State using function
 
+        // Shaders
         shaderProgram.activate();
+
+        timeValue = glfwGetTime();
+        value = (sin(timeValue) / 2.0f) + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shaderProgram.ID, "uniColor");
+        glUniform4f(vertexColorLocation, 0.2f, 0.2f, value, 1.0f);
+
+        
+
         // This can be before glClear (unsure if will cause undefined behavior)
         vao1.bind();
         // This needs to be after glClear for anything actually to be drawn
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo1.ID);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
         glDrawArrays(GL_TRIANGLES, 0, 3);  
 
@@ -101,6 +132,7 @@ int main()
         glfwPollEvents();
     }
 
+    // Cleanup
     vao1.dispose();    
     vbo1.dispose();    
     ebo1.dispose();    
