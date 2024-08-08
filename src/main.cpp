@@ -219,15 +219,18 @@ void processInput(GLFWwindow* window, float& mixValue)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         // std::cout  << "FILL MODE" << std::endl;
     }    
+
+    // For playing with the mixing of textures
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        mixValue += 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+        mixValue += 0.01f; 
         if(mixValue >= 1.0f)
             mixValue = 1.0f;
     }
+
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        mixValue -= 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+        mixValue -= 0.01f; 
         if (mixValue <= 0.0f)
             mixValue = 0.0f;
     }
