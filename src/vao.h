@@ -12,7 +12,7 @@ class VAO {
         VAO(); 
         
         // Links a VBO to the VAO - generating and enabling a vertex attribute pointer
-        void linkVBO(VBO& VBO, GLuint layout); // vertex attribute stuff
+        void linkAttrib(VBO& VBO, GLuint layout, unsigned int size, unsigned int stride, void* pointer); // vertex attribute stuff
 
         void bind(); 
         void unbind();

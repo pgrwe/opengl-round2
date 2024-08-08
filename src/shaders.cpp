@@ -7,17 +7,17 @@
 std::string get_file_contents(const char* filename)
 {
 	std::ifstream in(filename, std::ios::binary);
-	if (in)
-	{
-		std::string contents;
-		in.seekg(0, std::ios::end);
-		contents.resize(in.tellg());
-		in.seekg(0, std::ios::beg);
-		in.read(&contents[0], contents.size());
-		in.close();
-		return(contents);
-	}
-	throw(errno);
+    if (in)
+    {
+        std::string contents;
+        in.seekg(0, std::ios::end);
+        contents.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read(&contents[0], contents.size());
+        in.close();
+        return(contents);
+    }
+    throw std::runtime_error("Failed to open file: " + std::string(filename));
 }
 
 Shader::Shader(const char* vFile, const char* fFile)
@@ -69,6 +69,7 @@ GLuint Shader::loadVertexShader(const char* vFile)
     return vertexShader;
 }
 
+// Same as use() in learnopengl
 void Shader::activate()
 {
     glUseProgram(ID);
@@ -78,6 +79,26 @@ void Shader::dispose()
 {
     glDeleteProgram(ID);
 }
+
+// Uniform Functions
+
+void Shader::set1Bool(const std::string &name, bool value) const
+{         
+    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value); 
+}
+
+void Shader::set1Int(const std::string &name, int value) const
+{ 
+    glUniform1i(glGetUniformLocation(ID, name.c_str()), value); 
+}
+
+void Shader::set1Float(const std::string &name, float value) const
+{ 
+    glUniform1f(glGetUniformLocation(ID, name.c_str()), value); 
+} 
+
+
+// Debug Functions
 
 int Shader::debugAllShaders(GLuint& vertexShader, GLuint& fragmentShader)
 {

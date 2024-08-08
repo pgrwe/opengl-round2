@@ -13,7 +13,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Add source files as project scales
-set(SOURCES src/main.cpp src/shaders.cpp src/vbo.cpp src/vao.cpp src/ebo.cpp)
+set(SOURCES src/main.cpp src/shaders.cpp src/vbo.cpp src/vao.cpp src/ebo.cpp src/stb_image.h src/texture.cpp)
 
 # Add GLFW - disable building tests, examples, and docs
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

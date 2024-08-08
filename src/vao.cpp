@@ -1,12 +1,11 @@
 #include "vao.h"
-#include <sys/types.h>
 
 VAO::VAO()
 {
     glGenVertexArrays(1, &ID);
 }
 
-void VAO::linkVBO(VBO& VBO, GLuint layout)
+void VAO::linkAttrib(VBO& VBO, GLuint layout, unsigned int size, unsigned int stride, void* pointer)
 {
     VBO.bind();
     /* Parameter Breakdown
@@ -18,8 +17,8 @@ void VAO::linkVBO(VBO& VBO, GLuint layout)
     6th: offset - where the start of the attribute data is located in the buffer 
     vertex attribute 0 is now associated with the vertex data from the currently bound VBO
     */
-    glVertexAttribPointer(layout, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(layout, size, GL_FLOAT, GL_FALSE, stride, pointer);
+    glEnableVertexAttribArray(layout);
     VBO.unbind();
 }
 
