@@ -19,7 +19,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+// Handle window resizing 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);  
+// Handle user inputs
 void processInput(GLFWwindow* window, float& mixValue);
 
 const unsigned int WINDOW_WIDTH = 800;
