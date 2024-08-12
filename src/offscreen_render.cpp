@@ -7,7 +7,6 @@
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
 
-// This is bad practice, but for the sake of speed we will just define the shaders here
 // Most of this is copied from the OpenGL tutorial (LearnOpenGL)
 const char* vertexShaderSource = R"(
 #version 330 core
@@ -90,7 +89,7 @@ int main() {
 
     // This is the key part for fake offscreen rendering
     // Makes window invisible - we will render to a framebuffer instead
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);  
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
     GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Offscreen Rendering", NULL, NULL);
     if (!window) {
@@ -149,7 +148,7 @@ int main() {
 
     // Create a renderbuffer object for depth and stencil attachment
     // Depth: how far away an object is from the camera
-    // Stencil: used for masking 
+    // Stencil: used for masking
     // Masking: only render certain parts of the scene
     GLuint rbo;
     glGenRenderbuffers(1, &rbo);

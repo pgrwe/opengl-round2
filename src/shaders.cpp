@@ -1,8 +1,4 @@
 #include "shaders.h"
-#include <fstream>
-#include <glm/gtc/type_ptr.hpp>
-#include <ios>
-#include <iostream>
 
 // Reads a text file and outputs a string with everything in the text file
 std::string get_file_contents(const char* filename)
@@ -84,19 +80,19 @@ void Shader::dispose()
 // Uniform Functions
 
 void Shader::set1Bool(const std::string &name, bool value) const
-{         
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value); 
+{
+    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 }
 
 void Shader::set1Int(const std::string &name, int value) const
-{ 
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), value); 
+{
+    glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
 
 void Shader::set1Float(const std::string &name, float value) const
-{ 
-    glUniform1f(glGetUniformLocation(ID, name.c_str()), value); 
-} 
+{
+    glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+}
 
 void Shader::setMat4fv(const std::string &name, const glm::mat4 &mat) const
 {

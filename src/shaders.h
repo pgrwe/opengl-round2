@@ -4,7 +4,9 @@
 #include <glad/glad.h>
 #include <cerrno>
 #include <string>
-#include <glm/gtc/type_ptr.hpp>
+#include <gtc/type_ptr.hpp>
+#include <fstream>
+#include <iostream>
 
 std::string get_file_contents(const char * filename);
 
@@ -20,9 +22,9 @@ class Shader
 
         // Utility uniform functions
         // Set 1 bool uniform
-        void set1Bool(const std::string &name, bool value) const;  
+        void set1Bool(const std::string &name, bool value) const;
         // Set 1 int uniform
-        void set1Int(const std::string &name, int value) const;   
+        void set1Int(const std::string &name, int value) const;
         // Set 1 float uniform
         void set1Float(const std::string &name, float value) const;
         // Set 1 4x4 Matrix populated with floats
