@@ -2,7 +2,7 @@
 out vec4 FragColor;
 
 // input from vertex shader
-in vec4 vertexColor; 
+// in vec4 vertexColor; 
 in vec2 texCoord;
 
 uniform sampler2D texture1;

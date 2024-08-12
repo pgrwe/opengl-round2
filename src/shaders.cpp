@@ -1,5 +1,6 @@
 #include "shaders.h"
 #include <fstream>
+#include <glm/gtc/type_ptr.hpp>
 #include <ios>
 #include <iostream>
 
@@ -96,6 +97,11 @@ void Shader::set1Float(const std::string &name, float value) const
 { 
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value); 
 } 
+
+void Shader::setMat4fv(const std::string &name, const glm::mat4 &mat) const
+{
+    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
 
 
 // Debug Functions

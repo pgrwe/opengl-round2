@@ -1,6 +1,12 @@
 #include <cmath>
 #include <glad/glad.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
+#include <glm/trigonometric.hpp>
 #include <iostream>
 
 #include "shaders.h"
@@ -8,6 +14,7 @@
 #include "vbo.h"
 #include "vao.h"
 #include "ebo.h"
+
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -84,6 +91,114 @@ int main()
         4, 5, 3,  
     };
 
+
+    float testVertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f), 
+        glm::vec3( 2.0f,  5.0f, -15.0f), 
+        glm::vec3(-1.5f, -2.2f, -2.5f),  
+        glm::vec3(-3.8f, -2.0f, -12.3f),  
+        glm::vec3( 2.4f, -0.4f, -3.5f),  
+        glm::vec3(-1.7f,  3.0f, -7.5f),  
+        glm::vec3( 1.3f, -2.0f, -2.5f),  
+        glm::vec3( 1.5f,  2.0f, -2.5f), 
+        glm::vec3( 1.5f,  0.2f, -1.5f), 
+        glm::vec3(-1.3f,  1.0f, -1.5f)  
+    };
+
+
+    GLfloat cubeVertices[] = {		// COLORs
+    -0.5f,  0.5f, 0.5f,
+    0.8f, 0.3f, 0.02f, 1.0f,// Upper left front
+    1.0f, 1.0f,
+
+    -0.5f,  0.5f,-0.5f,  
+    0.8f, 0.3f, 0.02f, 1.0f, // Upper left back
+    1.0f, 0.0f,
+
+    0.5f,  0.5f,-0.5f,	
+    0.8f, 0.3f, 0.02f, 1.0f, // Upper right back
+    0.0f, 0.0f,
+
+    0.5f,  0.5f, 0.5f,  
+    0.8f, 0.3f, 0.02f, 1.0f, // Upper right front
+    0.0f, 1.0f,
+
+    -0.5f,  -0.5f, 0.5f,
+    0.8f, 0.3f, 0.02f,  1.0f,// Lower left front
+    1.0f, 1.0f,
+
+    -0.5f,  -0.5f,-0.5f, 
+    0.8f, 0.3f, 0.02f,1.0f, // Lower left back
+    1.0f, 0.0f,
+
+    0.5f,  -0.5f,-0.5f,
+    0.8f, 0.3f, 0.02f, 1.0f, // Lower right back
+    0.0f, 0.0f,
+
+    0.5f,  -0.5f, 0.5f,
+    0.8f, 0.3f, 0.02f, 1.0f, // Lower right front
+    0.0f, 1.0f,
+    };
+
+    GLuint cubeIndices[] = {
+        0, 3, 4,
+        3, 7, 4,
+        3, 2, 7,
+        2, 7, 6,
+        2, 1, 6,
+        5, 1, 6,
+        1, 0, 4,
+        0, 4, 5,
+        1, 2, 0,
+        0, 2, 3,
+        4, 5, 6,
+        6, 7, 4
+    };
+
     // PROJECT SETUP START
     // Initialize GLFW
     glfwInit();
@@ -115,7 +230,7 @@ int main()
 
     // Load in and create textures
     Texture texture1("resources/container.jpg");
-    Texture texture2("resources/real.png");
+    Texture texture2("resources/borpa.jpg");
 
     // Load in and compile shaders
     Shader shaderProgram("src/shaders/default.vert", "src/shaders/default.frag");
@@ -127,61 +242,76 @@ int main()
     OpenGL internally stores a reference to the buffer per target and, based on the target, processes the buffer differently. 
     */ 
  
-    // VBO vbo1(sizeof(rectVertices), rectVertices); 
-    // EBO ebo1(sizeof(rectIndices), rectIndices); 
-    VBO vbo1(sizeof(rectVertices), rectVertices); 
-    EBO ebo1(sizeof(rectIndices), rectIndices); 
+    VBO vbo1(sizeof(testVertices), testVertices); 
+    // EBO ebo1(sizeof(cubeIndices), cubeIndices); 
     VAO vao1; 
     vao1.bind();
 
-    // Stride should always be = num values * size of values
-    int stride = 9 * sizeof(float);
+    // Stride should always be = total values in vertex attributes * size of values
+    int stride = 5 * sizeof(float);
     // Vertex Attributes:
     // Position
     vao1.linkAttrib(vbo1, 0, 3, stride, (void*) 0);    
     // Color
-    vao1.linkAttrib(vbo1, 1, 4, stride, (void*) (3 * sizeof(float)));   
+    // vao1.linkAttrib(vbo1, 1, 4, stride, (void*) (3 * sizeof(float)));   
     // Texture Coordinates
-    vao1.linkAttrib(vbo1, 2, 2, stride, (void*) (7 * sizeof(float)));
+    vao1.linkAttrib(vbo1, 1, 2, stride, (void*) (3 * sizeof(float)));
 
-    int elementCount = (sizeof(rectIndices)/sizeof(rectIndices[0]));
+    int elementCount = (sizeof(cubeVertices)/sizeof(cubeIndices[0]));
 
     float timeValue;    
     float mixValue = 0.2;
-    float value;    
+
+    glEnable(GL_DEPTH_TEST);  
 
     // Main Game Loop
     while (!glfwWindowShouldClose(window)) 
     {
+        timeValue = glfwGetTime();
+
+        // Transformation Matrices
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+
+
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); 
+        projection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
 
         // Handle Input
-        // Is there a better way to handle input variable then by reference?
         processInput(window, mixValue);
 
         // Rendering Commands 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // State setting function 
-        glClear(GL_COLOR_BUFFER_BIT); // State using function
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // State using function
 
-        // Shaders
-
-        // timeValue = glfwGetTime();
-        // value = (sin(timeValue) / 2.0f) + 0.5f;
-        // int vertexColorLocation = glGetUniformLocation(shaderProgram.ID, "uniColor");
-        // glUniform4f(vertexColorLocation, 0.2f, 0.2f, value, 1.0f);
-        // shaderProgram.set1Float("shift", value);
+        // Textures
         glActiveTexture(GL_TEXTURE0);
         texture1.bind();
         glActiveTexture(GL_TEXTURE1);
         texture2.bind();
         
+        // Uniforms
         shaderProgram.activate();
         shaderProgram.set1Int("texture1", 0);
         shaderProgram.set1Int("texture2", 1);
         shaderProgram.set1Float("mixValue", mixValue);
 
+        shaderProgram.setMat4fv("view", view);
+        shaderProgram.setMat4fv("projection", projection);
+
+        // Binding
         vao1.bind();
-        ebo1.bind();
-        glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0);
+        // ebo1.bind();
+        // Draw Calls
+        // glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0);
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            model = glm::rotate(model, timeValue * i / 4 + 2, glm::vec3(1.0f, 0.3f, 0.5f));
+            shaderProgram.setMat4fv("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         // Swap Buffers
         glfwSwapBuffers(window);
@@ -191,7 +321,7 @@ int main()
     // Cleanup
     vao1.dispose();    
     vbo1.dispose();    
-    ebo1.dispose();    
+    // ebo1.dispose();    
     shaderProgram.dispose();
     glfwDestroyWindow(window);
     glfwTerminate();

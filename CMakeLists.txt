@@ -19,11 +19,14 @@ set(SOURCES src/main.cpp src/shaders.cpp src/vbo.cpp src/vao.cpp src/ebo.cpp src
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(external/glfw-3.4)
 
+# ADD GLM
+add_subdirectory(external/glm)
+# Add GLFW
+add_subdirectory(external/glfw-3.4)
 # Add GLAD - create glad library from the glad.c source file
 add_library(glad external/glad/src/glad.c)
-# Specify where to find the glad.h header
+# # Specify where to find the glad.h header
 target_include_directories(glad PUBLIC external/glad/include)
 
 # Add executable to be created
@@ -33,8 +36,4 @@ add_executable(opengl_round2 ${SOURCES})
 # add_executable(offscreen_render src/offscreen_render.cpp) 
 
 # Link the executable with the glfw and glad libraries
-target_link_libraries(opengl_round2 glfw glad)
-
-# Specify include directories for the executable
-target_include_directories(opengl_round2 PUBLIC external/glad/include)
-target_include_directories(opengl_round2 PUBLIC external/glfw/include)
+target_link_libraries(opengl_round2 glfw glad glm)
