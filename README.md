@@ -22,7 +22,7 @@ make
 - 0: Wireframe Mode
 - 1: Fill Mode (default)
 - Up: Increase texture mix value
-- Up: Decrease texture mix value
+- Down: Decrease texture mix value
  
 
 Tested on Arch Linux, Windows 11, and macOS
