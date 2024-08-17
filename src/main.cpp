@@ -1,6 +1,6 @@
 #include <cmath>
 #include <glad/glad.h>
-#include "glm.hpp"
+#include <glm.hpp>
 #include <ext/vector_float3.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -8,20 +8,28 @@
 #include <trigonometric.hpp>
 #include <iostream>
 
+#include "geometric.hpp"
 #include "shaders.h"
 #include "texture.h"
 #include "vbo.h"
 #include "vao.h"
 #include "ebo.h"
 
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+struct processInputData {
+    float mixValue;
+    float deltaTime;
+    glm::vec3 cameraPos;
+    glm::vec3 cameraFront;
+    glm::vec3 cameraUp;
+};
 
 // Handle window resizing
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // Handle user inputs
-void processInput(GLFWwindow* window, float& mixValue);
+void processInput(GLFWwindow* window, struct processInputData* processInputData);
 
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
@@ -62,15 +70,6 @@ int main()
     // Texture Coords
     0.0f, 1.0f,
     };
-
-    // GLfloat rectVertices[] = {
-    // // position
-    // 0.5f,  0.5f, 0.0f,
-    // 0.5f, -0.5f, 0.0f,
-    // -0.5f, -0.5f, 0.0f,
-    // -0.5f,  0.5f, 0.0f,
-    // };
-
 
     GLfloat triforceVertices[] = {
     -0.5f, -0.5f, 0.0f, // bottom left
@@ -150,56 +149,6 @@ int main()
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-
-    GLfloat cubeVertices[] = {		// COLORs
-    -0.5f,  0.5f, 0.5f,
-    0.8f, 0.3f, 0.02f, 1.0f,// Upper left front
-    1.0f, 1.0f,
-
-    -0.5f,  0.5f,-0.5f,
-    0.8f, 0.3f, 0.02f, 1.0f, // Upper left back
-    1.0f, 0.0f,
-
-    0.5f,  0.5f,-0.5f,
-    0.8f, 0.3f, 0.02f, 1.0f, // Upper right back
-    0.0f, 0.0f,
-
-    0.5f,  0.5f, 0.5f,
-    0.8f, 0.3f, 0.02f, 1.0f, // Upper right front
-    0.0f, 1.0f,
-
-    -0.5f,  -0.5f, 0.5f,
-    0.8f, 0.3f, 0.02f,  1.0f,// Lower left front
-    1.0f, 1.0f,
-
-    -0.5f,  -0.5f,-0.5f,
-    0.8f, 0.3f, 0.02f,1.0f, // Lower left back
-    1.0f, 0.0f,
-
-    0.5f,  -0.5f,-0.5f,
-    0.8f, 0.3f, 0.02f, 1.0f, // Lower right back
-    0.0f, 0.0f,
-
-    0.5f,  -0.5f, 0.5f,
-    0.8f, 0.3f, 0.02f, 1.0f, // Lower right front
-    0.0f, 1.0f,
-    };
-
-    GLuint cubeIndices[] = {
-        0, 3, 4,
-        3, 7, 4,
-        3, 2, 7,
-        2, 7, 6,
-        2, 1, 6,
-        5, 1, 6,
-        1, 0, 4,
-        0, 4, 5,
-        1, 2, 0,
-        0, 2, 3,
-        4, 5, 6,
-        6, 7, 4
-    };
-
     // PROJECT SETUP START
     // Initialize GLFW
     glfwInit();
@@ -222,7 +171,7 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-
+ 
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     // PROJECT SETUP END
@@ -258,28 +207,45 @@ int main()
     // Texture Coordinates
     vao1.linkAttrib(vbo1, 1, 2, stride, (void*) (3 * sizeof(float)));
 
-    int elementCount = (sizeof(cubeVertices)/sizeof(cubeIndices[0]));
+    // For using ebo
+    // int elementCount = (sizeof(cubeVertices)/sizeof(cubeIndices[0]));
 
-    float timeValue;
-    float mixValue = 0.2;
 
+    // Not sure if this is a great way to handle input data but it avoids global state
+    struct processInputData processInputData;
+    // Set original camera position    
+    processInputData.cameraPos = glm::vec3(0.0f, 0.0f,  3.0f); 
+    processInputData.cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    processInputData.cameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
+    processInputData.mixValue = 0.2f;
+    processInputData.deltaTime = 0.0f;
+
+    float lastFrame = 0.0f;
+    float currentFrame;
+
+    // Z buffer
     glEnable(GL_DEPTH_TEST);
-
     // Main Game Loop
     while (!glfwWindowShouldClose(window))
     {
-        timeValue = glfwGetTime();
+        currentFrame = glfwGetTime();
+        processInputData.deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         // Transformation Matrices
-        glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
+        glm::mat4 view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 3.0f), 
+        glm::vec3(0.0f, 0.0f, 0.0f), 
+        glm::vec3(0.0f, 1.0f, 0.0f)
+        );
 
-
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        projection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
+        // view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view = glm::lookAt(processInputData.cameraPos, processInputData.cameraPos + processInputData.cameraFront, processInputData.cameraUp);  
+        projection = glm::perspective(glm::radians(55.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
 
         // Handle Input
-        processInput(window, mixValue);
+        processInput(window, &processInputData);
 
         // Rendering Commands
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // State setting function
@@ -295,7 +261,7 @@ int main()
         shaderProgram.activate();
         shaderProgram.set1Int("texture1", 0);
         shaderProgram.set1Int("texture2", 1);
-        shaderProgram.set1Float("mixValue", mixValue);
+        shaderProgram.set1Float("mixValue", processInputData.mixValue);
 
         shaderProgram.setMat4fv("view", view);
         shaderProgram.setMat4fv("projection", projection);
@@ -309,7 +275,7 @@ int main()
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
-            model = glm::rotate(model, timeValue * i / 4 + 2, glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, currentFrame * i / 4 + 2, glm::vec3(1.0f, 0.3f, 0.5f));
             shaderProgram.setMat4fv("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
@@ -334,10 +300,34 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window, float& mixValue)
+void processInput(GLFWwindow* window, struct processInputData* processInputData)
 {
+    const float cameraSpeed = 2.5f * processInputData->deltaTime;
+
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
         glfwSetWindowShouldClose(window, true);
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        processInputData->cameraPos += cameraSpeed * processInputData->cameraFront;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        processInputData->cameraPos -= glm::normalize(glm::cross(processInputData->cameraFront, processInputData->cameraUp)) * cameraSpeed;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        processInputData->cameraPos -= cameraSpeed * processInputData->cameraFront;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        processInputData->cameraPos += glm::normalize(glm::cross(processInputData->cameraFront, processInputData->cameraUp)) * cameraSpeed;
+    }
 
     if(glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS)
     {
@@ -354,15 +344,15 @@ void processInput(GLFWwindow* window, float& mixValue)
     // For playing with the mixing of textures
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        mixValue += 0.01f;
-        if(mixValue >= 1.0f)
-            mixValue = 1.0f;
+        processInputData->mixValue += 0.01f;
+        if(processInputData->mixValue >= 1.0f)
+            processInputData->mixValue = 1.0f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        mixValue -= 0.01f;
-        if (mixValue <= 0.0f)
-            mixValue = 0.0f;
+        processInputData->mixValue -= 0.01f;
+        if (processInputData->mixValue <= 0.0f)
+            processInputData->mixValue = 0.0f;
     }
 }
