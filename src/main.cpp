@@ -8,7 +8,8 @@
 #include <trigonometric.hpp>
 #include <iostream>
 
-#include "geometric.hpp"
+#include "data.h"
+#include "camera.h"
 #include "shaders.h"
 #include "texture.h"
 #include "vbo.h"
@@ -18,137 +19,27 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-struct processInputData {
-    float mixValue;
-    float deltaTime;
-    glm::vec3 cameraPos;
-    glm::vec3 cameraFront;
-    glm::vec3 cameraUp;
-};
-
-// Handle window resizing
+void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-// Handle user inputs
-void processInput(GLFWwindow* window, struct processInputData* processInputData);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = WINDOW_WIDTH / 2.0f;
+float lastY = WINDOW_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f;	// time between current frame and last frame
+float lastFrame = 0.0f;
+
+float mixValue = 0.2f;
+
 int main()
 {
-    GLfloat rectVertices[] = {
-
-    // Top right
-    // Position
-    0.5f,  0.5f, 0.0f,
-    // Colors and alpha
-    1.0f, 0.0f, 0.0f,  1.0f,
-    // Texture Coords
-    1.0f, 1.0f,
-
-    // Bottom right
-    // Position
-    0.5f, -0.5f, 0.0f,
-    // Colors and alpha
-    0.0f, 1.0f, 0.0f,1.0f,
-    // Texture Coords
-    1.0f, 0.0f,
-
-    // Bottom left
-    // Position
-    -0.5f, -0.5f, 0.0f,
-    // Colors and alpha
-    0.0f, 0.0f, 1.0f,1.0f,
-    // Texture Coords
-    0.0f, 0.0f,
-
-    // Top left
-    // Position
-    -0.5f,  0.5f, 0.0f,
-    // Colors and alpha
-    0.5f, 0.0f, 0.5f,1.0f,
-    // Texture Coords
-    0.0f, 1.0f,
-    };
-
-    GLfloat triforceVertices[] = {
-    -0.5f, -0.5f, 0.0f, // bottom left
-    0.0f, -0.5f, 0.0f, // bottom middle
-    0.5f,  -0.5f, 0.0f,  // bottom right
-    -0.25f,  0.0f, 0.0f,  // middle left
-    0.25f,  0.0f, 0.0f,  // middle right
-    0.0f, 0.5f, 0.0f, // top
-    };
-
-    unsigned int rectIndices[] = {
-        0, 1, 3, // first tri
-        1, 2, 3 // second tri
-    };
-
-    unsigned int triforceIndices[] = {
-        0, 3, 1,
-        1, 2, 4,
-        4, 5, 3,
-    };
-
-
-    float testVertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
-
-    glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-
     // PROJECT SETUP START
     // Initialize GLFW
     glfwInit();
@@ -174,9 +65,11 @@ int main()
  
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
     // PROJECT SETUP END
 
-
+    float lastX = 400, lastY = 300;
 
     // Load in and create textures
     Texture texture1("resources/container.jpg");
@@ -210,15 +103,7 @@ int main()
     // For using ebo
     // int elementCount = (sizeof(cubeVertices)/sizeof(cubeIndices[0]));
 
-
-    // Not sure if this is a great way to handle input data but it avoids global state
-    struct processInputData processInputData;
-    // Set original camera position    
-    processInputData.cameraPos = glm::vec3(0.0f, 0.0f,  3.0f); 
-    processInputData.cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    processInputData.cameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
-    processInputData.mixValue = 0.2f;
-    processInputData.deltaTime = 0.0f;
+    deltaTime = 0.0f;
 
     float lastFrame = 0.0f;
     float currentFrame;
@@ -229,23 +114,15 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         currentFrame = glfwGetTime();
-        processInputData.deltaTime = currentFrame - lastFrame;
+        deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         // Transformation Matrices
-        glm::mat4 projection = glm::mat4(1.0f);
-        glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 3.0f), 
-        glm::vec3(0.0f, 0.0f, 0.0f), 
-        glm::vec3(0.0f, 1.0f, 0.0f)
-        );
-
-        // view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        view = glm::lookAt(processInputData.cameraPos, processInputData.cameraPos + processInputData.cameraFront, processInputData.cameraUp);  
-        projection = glm::perspective(glm::radians(55.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
 
         // Handle Input
-        processInput(window, &processInputData);
+        processInput(window);
 
         // Rendering Commands
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // State setting function
@@ -261,7 +138,7 @@ int main()
         shaderProgram.activate();
         shaderProgram.set1Int("texture1", 0);
         shaderProgram.set1Int("texture2", 1);
-        shaderProgram.set1Float("mixValue", processInputData.mixValue);
+        shaderProgram.set1Float("mixValue", mixValue);
 
         shaderProgram.setMat4fv("view", view);
         shaderProgram.setMat4fv("projection", projection);
@@ -300,33 +177,53 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window, struct processInputData* processInputData)
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    const float cameraSpeed = 2.5f * processInputData->deltaTime;
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void processInput(GLFWwindow* window)
+{
+    const float cameraSpeed = 2.5f * deltaTime;
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
     }
 
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        processInputData->cameraPos += cameraSpeed * processInputData->cameraFront;
+        camera.ProcessKeyboard(FORWARD, deltaTime);
     }
 
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        processInputData->cameraPos -= glm::normalize(glm::cross(processInputData->cameraFront, processInputData->cameraUp)) * cameraSpeed;
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
     }
 
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        processInputData->cameraPos -= cameraSpeed * processInputData->cameraFront;
+        camera.ProcessKeyboard(LEFT, deltaTime);
     }
-
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        processInputData->cameraPos += glm::normalize(glm::cross(processInputData->cameraFront, processInputData->cameraUp)) * cameraSpeed;
+        camera.ProcessKeyboard(RIGHT, deltaTime);
     }
 
     if(glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS)
@@ -344,15 +241,20 @@ void processInput(GLFWwindow* window, struct processInputData* processInputData)
     // For playing with the mixing of textures
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        processInputData->mixValue += 0.01f;
-        if(processInputData->mixValue >= 1.0f)
-            processInputData->mixValue = 1.0f;
+        mixValue += 0.01f;
+        if(mixValue >= 1.0f)
+            mixValue = 1.0f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        processInputData->mixValue -= 0.01f;
-        if (processInputData->mixValue <= 0.0f)
-            processInputData->mixValue = 0.0f;
+        mixValue -= 0.01f;
+        if (mixValue <= 0.0f)
+            mixValue = 0.0f;
     }
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
