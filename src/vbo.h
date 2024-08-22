@@ -8,12 +8,18 @@ class VBO
 { 
     public:
         GLuint ID;
+        // Generates VBO with ID
         VBO();
+        // Generates VBO with ID and sets buffer data
         VBO(GLsizeiptr size, GLfloat* vertices);
 
+        // Sets VBO buffer data
         void setBufferData(GLsizeiptr size, GLfloat* vertices);
+        // Make this VBO current target
         void bind();
+        // Remove this VBO current target (assigns current target to 0)
         void unbind();
+        // Delete the VBO
         void dispose();
 };
 

@@ -9,6 +9,7 @@ class Texture
 {
     public:  
         GLuint ID;
+        std::string type;
         Texture(const char* data);
         void bind();
         void unbind();

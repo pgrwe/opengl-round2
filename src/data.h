@@ -4,6 +4,9 @@
 #include <glad/glad.h>
 #include <glm.hpp>
 
+// File holding vertex and index data
+// Meant to keep main.cpp cleaner
+
 GLfloat rectVertices[] = {
 
 // Top right

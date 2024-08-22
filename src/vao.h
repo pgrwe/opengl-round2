@@ -14,8 +14,11 @@ class VAO {
         // Links a VBO to the VAO - generating and enabling a vertex attribute pointer
         void linkAttrib(VBO& VBO, GLuint layout, unsigned int size, unsigned int stride, void* pointer); // vertex attribute stuff
 
+        // Make this vao the current target
         void bind(); 
+        // Remove this vao as the current target (assigns current target to 0)
         void unbind();
+        // Delete the vao
         void dispose();
 };
 

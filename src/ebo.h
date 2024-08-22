@@ -8,8 +8,13 @@ class EBO
 {
     public:
         GLuint ID;
+        // Generates EBO with ID
+        EBO();
+        // Generates EBO with ID and sets buffer data
         EBO(GLsizeiptr size, GLuint* indices);
 
+        // Sets EBO buffer data
+        void setBufferData(GLsizeiptr size, GLuint* indices);
         // Makes bound EBO current target 
         void bind();
         // Removes referenced EBO as target

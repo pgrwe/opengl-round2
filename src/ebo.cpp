@@ -1,12 +1,23 @@
 #include "ebo.h"
 
+EBO::EBO()
+{
+    glGenBuffers(1, &ID);
+}
+
 EBO::EBO(GLsizeiptr size, GLuint* indices)
 {
     glGenBuffers(1, &ID);
     bind();
-    // might create setBufferData when needed
+    setBufferData(size, indices);
+}
+
+
+void EBO::setBufferData(GLsizeiptr size, GLuint* indices)
+{
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
 }
+
 
 void EBO::bind()
 {
