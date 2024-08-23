@@ -10,7 +10,10 @@ class Texture
     public:  
         GLuint ID;
         std::string type;
+        std::string path;
         Texture(const char* data);
+        Texture(const char* path, const std::string& directory);
+
         void bind();
         void unbind();
         void activate();

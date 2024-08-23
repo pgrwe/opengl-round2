@@ -1,4 +1,5 @@
 #include <cmath>
+#include <filesystem>
 #include <glad/glad.h>
 #include <glm.hpp>
 #include <ext/vector_float3.hpp>
@@ -11,6 +12,7 @@
 #include "data.h"
 #include "camera.h"
 #include "shaders.h"
+#include "model.h"
 #include "texture.h"
 #include "vbo.h"
 #include "vao.h"
@@ -72,11 +74,13 @@ int main()
     float lastX = 400, lastY = 300;
 
     // Load in and create textures
-    Texture texture1("resources/container.jpg");
-    Texture texture2("resources/borpa.jpg");
+    // Texture texture1("resources/container.jpg");
+    // Texture texture2("resources/borpa.jpg");
 
     // Load in and compile shaders
     Shader shaderProgram("src/shaders/default.vert", "src/shaders/default.frag");
+
+    Model modelData("resources/objects/backpack/backpack.obj");
 
     /* Buffers:
     A buffer in OpenGL is, at its core, an object that manages a certain piece of GPU memory and nothing more.
@@ -85,20 +89,20 @@ int main()
     OpenGL internally stores a reference to the buffer per target and, based on the target, processes the buffer differently.
     */
 
-    VBO vbo1(sizeof(testVertices), testVertices);
-    // EBO ebo1(sizeof(cubeIndices), cubeIndices);
-    VAO vao1;
-    vao1.bind();
+    // VBO vbo1(sizeof(testVertices), testVertices);
+    // // EBO ebo1(sizeof(cubeIndices), cubeIndices);
+    // VAO vao1;
+    // vao1.bind();
 
-    // Stride should always be = total values in vertex attributes * size of values
-    int stride = 5 * sizeof(float);
-    // Vertex Attributes:
-    // Position
-    vao1.linkAttrib(vbo1, 0, 3, stride, (void*) 0);
-    // Color
-    // vao1.linkAttrib(vbo1, 1, 4, stride, (void*) (3 * sizeof(float)));
-    // Texture Coordinates
-    vao1.linkAttrib(vbo1, 1, 2, stride, (void*) (3 * sizeof(float)));
+    // // Stride should always be = total values in vertex attributes * size of values
+    // int stride = 5 * sizeof(float);
+    // // Vertex Attributes:
+    // // Position
+    // vao1.linkAttrib(vbo1, 0, 3, stride, (void*) 0);
+    // // Color
+    // // vao1.linkAttrib(vbo1, 1, 4, stride, (void*) (3 * sizeof(float)));
+    // // Texture Coordinates
+    // vao1.linkAttrib(vbo1, 1, 2, stride, (void*) (3 * sizeof(float)));
 
     // For using ebo
     // int elementCount = (sizeof(cubeVertices)/sizeof(cubeIndices[0]));
@@ -128,34 +132,20 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // State setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // State using function
 
-        // Textures
-        glActiveTexture(GL_TEXTURE0);
-        texture1.bind();
-        glActiveTexture(GL_TEXTURE1);
-        texture2.bind();
+        // Render loaded models
 
         // Uniforms
         shaderProgram.activate();
-        shaderProgram.set1Int("texture1", 0);
-        shaderProgram.set1Int("texture2", 1);
-        shaderProgram.set1Float("mixValue", mixValue);
-
         shaderProgram.setMat4fv("view", view);
         shaderProgram.setMat4fv("projection", projection);
 
-        // Binding
-        vao1.bind();
-        // ebo1.bind();
-        // Draw Calls
-        // glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0);
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            model = glm::rotate(model, currentFrame * i / 4 + 2, glm::vec3(1.0f, 0.3f, 0.5f));
-            shaderProgram.setMat4fv("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        shaderProgram.setMat4fv("model", model);
+        modelData.draw(shaderProgram);
 
         // Swap Buffers
         glfwSwapBuffers(window);
@@ -163,8 +153,8 @@ int main()
     }
 
     // Cleanup
-    vao1.dispose();
-    vbo1.dispose();
+    // vao1.dispose();
+    // vbo1.dispose();
     // ebo1.dispose();
     shaderProgram.dispose();
     glfwDestroyWindow(window);

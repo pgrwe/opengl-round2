@@ -1,3 +1,6 @@
+#ifndef MESH_H
+#define MESH_H
+
 #include <glm.hpp>
 #include <glad/glad.h>
 #include <string>
@@ -13,7 +16,6 @@ struct Vertex {
     glm::vec3 Normal;
     glm::vec2 TexCoords;
 };
-
 
 class Mesh 
 {
@@ -31,3 +33,5 @@ class Mesh
         EBO ebo;
         void setupMesh();
 };
+
+#endif
