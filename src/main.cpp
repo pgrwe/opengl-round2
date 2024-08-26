@@ -13,7 +13,7 @@
 #include "camera.h"
 #include "shaders.h"
 #include "model.h"
-#include "texture.h"
+// #include "texture.h"
 #include "vbo.h"
 #include "vao.h"
 #include "ebo.h"
@@ -88,25 +88,6 @@ int main()
     A buffer is only a vertex array buffer when we bind it to GL_ARRAY_BUFFER, but we could just as easily bind it to GL_ELEMENT_ARRAY_BUFFER.
     OpenGL internally stores a reference to the buffer per target and, based on the target, processes the buffer differently.
     */
-
-    // VBO vbo1(sizeof(testVertices), testVertices);
-    // // EBO ebo1(sizeof(cubeIndices), cubeIndices);
-    // VAO vao1;
-    // vao1.bind();
-
-    // // Stride should always be = total values in vertex attributes * size of values
-    // int stride = 5 * sizeof(float);
-    // // Vertex Attributes:
-    // // Position
-    // vao1.linkAttrib(vbo1, 0, 3, stride, (void*) 0);
-    // // Color
-    // // vao1.linkAttrib(vbo1, 1, 4, stride, (void*) (3 * sizeof(float)));
-    // // Texture Coordinates
-    // vao1.linkAttrib(vbo1, 1, 2, stride, (void*) (3 * sizeof(float)));
-
-    // For using ebo
-    // int elementCount = (sizeof(cubeVertices)/sizeof(cubeIndices[0]));
-
     deltaTime = 0.0f;
 
     float lastFrame = 0.0f;
@@ -145,7 +126,7 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
         shaderProgram.setMat4fv("model", model);
-        modelData.draw(shaderProgram);
+        modelData.Draw(shaderProgram);
 
         // Swap Buffers
         glfwSwapBuffers(window);
